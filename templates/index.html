@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÀI XỈU – Vui Là Chính</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- ── Background video ── -->
+    <video autoplay muted loop playsinline id="bgVideo">
+        <source src="{{ url_for('static', filename='bgvideo.mp4') }}" type="video/mp4">
+    </video>
+    <div class="bg-overlay"></div>
+
+    <!-- ════════════════════════════════════════════
+         SCREEN 1 – Welcome / Name entry
+    ═════════════════════════════════════════════ -->
+    <div id="screen-welcome" class="screen active">
+        <div class="welcome-card">
+            <div class="welcome-logo">🎲</div>
+            <h1 class="welcome-title">TÀI XỈU</h1>
+            <p class="welcome-sub">Vui là chính – Không có giá trị thực</p>
+
+            <div class="welcome-form">
+                <label class="welcome-label" for="playerName">
+                    Chúng tôi nên gọi bạn là gì?
+                </label>
+                <input
+                    type="text"
+                    id="playerName"
+                    class="welcome-input"
+                    placeholder="Nhập tên của bạn…"
+                    maxlength="80"
+                    autocomplete="off"
+                    autofocus
+                >
+                <div id="welcome-error" class="welcome-error hidden"></div>
+                <button id="btn-start" class="btn-start" onclick="registerPlayer()">
+                    Bắt đầu chơi →
+                </button>
+            </div>
+
+            <p class="welcome-note">
+                Bạn sẽ nhận <strong>36,000,000 đ</strong> tiền ảo để chơi.<br>
+                Chơi cho vui thôi, không có giá trị quy đổi nhé!
+            </p>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         SCREEN 2 – Game table
+    ═════════════════════════════════════════════ -->
+    <div id="screen-game" class="screen hidden">
+
+        <!-- Left panel: rules -->
+        <aside class="rules-panel">
+            <h2 class="rules-title">📜 Luật Chơi</h2>
+            <ul class="rules-list">
+                <li>
+                    <span class="rule-icon">🔵</span>
+                    <span><strong>XỈU (Small):</strong> Tổng 3 xúc xắc từ <em class="gold">4 – 10</em></span>
+                </li>
+                <li>
+                    <span class="rule-icon">🔴</span>
+                    <span><strong>TÀI (Big):</strong> Tổng 3 xúc xắc từ <em class="gold">11 – 17</em></span>
+                </li>
+                <li>
+                    <span class="rule-icon">⚠️</span>
+                    <span><strong>BÃO (Triple):</strong> 3 mặt giống nhau → nhà cái <span class="red">ăn hết</span></span>
+                </li>
+                <li>
+                    <span class="rule-icon">💰</span>
+                    <span><strong>Tỷ lệ:</strong> Đặt 1 thắng 1</span>
+                </li>
+            </ul>
+            <div class="rules-quote">"Cờ bạc người không chơi không bao giờ thắng."</div>
+        </aside>
+
+        <!-- Centre: game table -->
+        <main class="game-table" id="gameTable">
+
+            <!-- Header -->
+            <header class="table-header">
+                <h1 class="table-title">★ TÀI XỈU ★</h1>
+                <div class="player-badge">
+                    👤 <span id="display-name">–</span>
+                </div>
+            </header>
+
+            <!-- Balance -->
+            <div class="balance-row">
+                <div class="balance-box">
+                    💰 <span id="balance">36,000,000</span> <span class="currency">đ</span>
+                </div>
+            </div>
+
+            <!-- Dice area -->
+            <div class="dice-container">
+                <div id="dice1" class="dice">?</div>
+                <div id="dice2" class="dice">?</div>
+                <div id="dice3" class="dice">?</div>
+            </div>
+
+            <!-- Result message -->
+            <div class="result-display" id="result-text">Sẵn sàng!</div>
+
+            <!-- Bet input -->
+            <div class="bet-area">
+                <div class="quick-bets">
+                    <button class="btn-quick" onclick="setBet(100000)">100K</button>
+                    <button class="btn-quick" onclick="setBet(500000)">500K</button>
+                    <button class="btn-quick" onclick="setBet(1000000)">1M</button>
+                    <button class="btn-quick" onclick="setBet(5000000)">5M</button>
+                    <button class="btn-quick" onclick="betAll()">ALL-IN</button>
+                </div>
+                <input
+                    type="number"
+                    id="bet-amount"
+                    class="bet-input"
+                    placeholder="Nhập tiền cược…"
+                    value="100000"
+                    min="1"
+                >
+            </div>
+
+            <!-- Action buttons -->
+            <div class="action-buttons">
+                <button id="btn-xiu" class="btn-choice btn-xiu" onclick="playGame('XIU')">
+                    🔵 XỈU<span class="btn-sub">4 – 10</span>
+                </button>
+                <button id="btn-tai" class="btn-choice btn-tai" onclick="playGame('TAI')">
+                    🔴 TÀI<span class="btn-sub">11 – 17</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Right panel: history -->
+        <aside class="history-panel">
+            <h2 class="history-title">📋 Lịch Sử</h2>
+            <ul class="history-list" id="history-list">
+                <li class="history-empty">Chưa có ván nào…</li>
+            </ul>
+        </aside>
+    </div>
+
+    <!-- ════════════════════════════════════════════
+         SCREEN 3 – Broke (out of money)
+    ═════════════════════════════════════════════ -->
+    <div id="screen-broke" class="screen hidden">
+        <div class="broke-card">
+            <div class="broke-icon">💸</div>
+            <h2 class="broke-title">Hết tiền rồi!</h2>
+            <p class="broke-msg">
+                Tiền ảo của bạn đã về 0.<br>
+                Hãy thử lại với một cái tên mới nhé!
+            </p>
+            <button class="btn-start" onclick="location.reload()">Chơi lại từ đầu</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scrips.js') }}"></script>
+</body>
+</html>
