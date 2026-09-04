@@ -33,12 +33,11 @@ html, body {
    BACKGROUND VIDEO + OVERLAY
 ═══════════════════════════════════════════════════ */
 #bgVideo {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: 0;
+    display: none;
+}
+
+body {
+    background: url('/static/bg new.jpg') center/cover no-repeat fixed;
 }
 
 .bg-overlay {
@@ -75,6 +74,13 @@ html, body {
 /* ═══════════════════════════════════════════════════
    SCREEN 1 – WELCOME
 ═══════════════════════════════════════════════════ */
+#screen-welcome {
+    gap: 28px;
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 .welcome-card {
     background: var(--panel-bg);
     border: 2px solid var(--gold-dark);
@@ -172,6 +178,17 @@ html, body {
 }
 
 .welcome-note strong { color: var(--gold); }
+
+.welcome-credit {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #555;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 12px;
+}
+
+.welcome-credit strong { color: #888; }
 
 /* ═══════════════════════════════════════════════════
    SCREEN 2 – GAME TABLE  (3-column layout)
@@ -530,6 +547,239 @@ html, body {
 }
 
 .result-win { animation: textPulse 0.5s infinite alternate; }
+
+/* ═══════════════════════════════════════════════════
+   LEADERBOARD – BẢNG DANH VỌNG
+═══════════════════════════════════════════════════ */
+
+/* Bảng bên cạnh màn hình welcome */
+.lb-side {
+    background: var(--panel-bg);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    width: 230px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+    animation: fadeUp 0.5s ease both;
+    align-self: center;
+}
+
+/* Bảng bên trong panel luật chơi */
+.lb-ingame {
+    margin-top: 4px;
+    border-top: 1px dashed rgba(255,215,0,0.15);
+    padding-top: 4px;
+}
+
+.lb-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+}
+
+.lb-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+}
+
+.lb-empty {
+    color: #555;
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 12px 0;
+}
+
+.lb-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+    animation: fadeUp 0.3s ease both;
+}
+
+/* Highlight bản thân */
+.lb-item.me {
+    background: rgba(255,215,0,0.08);
+    border-color: rgba(255,215,0,0.3);
+}
+
+/* Top 3 màu sắc */
+.lb-rank {
+    font-weight: 700;
+    font-size: 0.9rem;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.lb-item:nth-child(1) .lb-rank { color: #ffd700; }
+.lb-item:nth-child(2) .lb-rank { color: #c0c0c0; }
+.lb-item:nth-child(3) .lb-rank { color: #cd7f32; }
+
+.lb-name {
+    flex: 1;
+    color: #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.lb-item.me .lb-name { color: var(--gold); }
+
+.lb-peak {
+    color: #2ecc71;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.lb-note {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #666;
+    line-height: 1.5;
+    border-top: 1px dashed rgba(255,255,255,0.07);
+    padding-top: 10px;
+}
+
+.lb-note strong { color: var(--gold); }
+
+/* ═══════════════════════════════════════════════════
+   STREAM – SOI CẦU PANEL
+═══════════════════════════════════════════════════ */
+.stream-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: rgba(8, 8, 16, 0.96);
+    border-top: 1px solid rgba(255, 215, 0, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px 14px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.stream-panel.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stream-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.stream-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+}
+
+.stream-note {
+    color: #555;
+    font-size: 0.75rem;
+    flex: 1;
+}
+
+.stream-countdown {
+    font-size: 0.78rem;
+    color: #888;
+}
+
+.stream-countdown strong {
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.stream-body {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+    align-items: center;
+}
+
+.stream-empty {
+    color: #444;
+    font-size: 0.8rem;
+}
+
+/* Mỗi bong bóng cầu */
+.stream-bubble {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: default;
+    transition: transform 0.15s;
+    position: relative;
+}
+
+.stream-bubble:hover { transform: scale(1.2); }
+
+.stream-bubble.tai    { background: var(--tai-red);  color: #fff; }
+.stream-bubble.xiu    { background: var(--xiu-blue); color: #fff; }
+.stream-bubble.triple { background: #e67e22;          color: #fff; }
+
+/* Bong bóng mới nhất có viền nhấp nháy */
+.stream-bubble.latest {
+    box-shadow: 0 0 0 2px var(--gold);
+    animation: bubblePulse 1s ease infinite alternate;
+}
+
+@keyframes bubblePulse {
+    from { box-shadow: 0 0 0 2px var(--gold); }
+    to   { box-shadow: 0 0 8px 3px var(--gold-glow); }
+}
+
+/* Tooltip khi hover */
+.stream-bubble::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1d27;
+    border: 1px solid #333;
+    color: #ddd;
+    font-size: 0.68rem;
+    padding: 4px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 99;
+}
+
+.stream-bubble:hover::after { opacity: 1; }
 
 /* ═══════════════════════════════════════════════════
    RESPONSIVE – stack vertically on small screens

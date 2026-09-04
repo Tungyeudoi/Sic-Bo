@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin – Sic Bo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            padding: 32px 24px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: #ffd700;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+
+        /* ── Summary cards ── */
+        .cards {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: #1a1d27;
+            border: 1px solid #2a2d3a;
+            border-radius: 12px;
+            padding: 18px 24px;
+            min-width: 160px;
+            flex: 1;
+        }
+
+        .card .label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .card .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        /* ── Table ── */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #2a2d3a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        thead {
+            background: #1a1d27;
+            position: sticky;
+            top: 0;
+        }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.73rem;
+            letter-spacing: 0.07em;
+            white-space: nowrap;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #1e2130;
+            transition: background 0.15s;
+        }
+
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #1a1d27; }
+
+        td {
+            padding: 11px 16px;
+            white-space: nowrap;
+        }
+
+        .name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .balance {
+            font-weight: 700;
+            color: #ffd700;
+        }
+
+        .pos { color: #2ecc71; }
+        .neg { color: #e74c3c; }
+        .neu { color: #888; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-up   { background: rgba(46,204,113,0.15); color: #2ecc71; }
+        .badge-down { background: rgba(231,76,60,0.15);  color: #e74c3c; }
+        .badge-neu  { background: rgba(255,255,255,0.07); color: #888; }
+
+        /* ── Refresh button ── */
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .btn-refresh {
+            padding: 8px 18px;
+            background: #ffd700;
+            color: #1a1000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-refresh:hover { background: #e6c200; }
+
+        .updated {
+            color: #444;
+            font-size: 0.78rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div>
+        <h1>🎲 Sic Bo – Admin Dashboard</h1>
+        <p class="subtitle">Dữ liệu người chơi · Chỉ mình bạn thấy trang này</p>
+    </div>
+    <div style="text-align:right">
+        <a class="btn-refresh" href="javascript:location.reload()">↻ Làm mới</a>
+        <p class="updated" id="updated"></p>
+    </div>
+</div>
+
+<!-- Summary cards -->
+<div class="cards">
+    <div class="card">
+        <div class="label">Tổng người chơi</div>
+        <div class="value">{{ total_players }}</div>
+    </div>
+    <div class="card">
+        <div class="label">Tổng ván đã chơi</div>
+        <div class="value">{{ stats | sum(attribute='total_rounds') }}</div>
+    </div>
+    <div class="card">
+        <div class="label">Tổng tiền cược</div>
+        <div class="value" style="font-size:1.1rem">
+            {{ "{:,.0f}".format(stats | sum(attribute='total_bet')) }} đ
+        </div>
+    </div>
+    <div class="card">
+        <div class="label">Người đang có nhiều tiền nhất</div>
+        <div class="value" style="font-size:1rem">
+            {% if stats %}
+                {{ (stats | max(attribute='balance')).name }}
+            {% else %}–{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Player table -->
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tên</th>
+                <th>Số dư</th>
+                <th>Lãi / Lỗ</th>
+                <th>Ván</th>
+                <th>Thắng</th>
+                <th>Thua</th>
+                <th>Tổng cược</th>
+                <th>Tham gia</th>
+                <th>Chơi gần nhất</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in stats %}
+            <tr>
+                <td class="neu">{{ p.id }}</td>
+                <td class="name">{{ p.name }}</td>
+                <td class="balance">{{ "{:,.0f}".format(p.balance) }} đ</td>
+                <td>
+                    {% if p.net > 0 %}
+                        <span class="badge badge-up">+{{ "{:,.0f}".format(p.net) }} đ</span>
+                    {% elif p.net < 0 %}
+                        <span class="badge badge-down">{{ "{:,.0f}".format(p.net) }} đ</span>
+                    {% else %}
+                        <span class="badge badge-neu">0 đ</span>
+                    {% endif %}
+                </td>
+                <td>{{ p.total_rounds }}</td>
+                <td class="pos">{{ p.wins }}</td>
+                <td class="neg">{{ p.losses }}</td>
+                <td class="neu">{{ "{:,.0f}".format(p.total_bet) }} đ</td>
+                <td class="neu">{{ p.joined }}</td>
+                <td class="neu">{{ p.last_seen }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="10" style="text-align:center; padding:40px; color:#444">
+                    Chưa có người chơi nào.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Hiện giờ cập nhật
+    const now = new Date();
+    document.getElementById('updated').textContent =
+        'Cập nhật lúc ' + now.toLocaleTimeString('vi-VN');
+</script>
+
+</body>
+</html>

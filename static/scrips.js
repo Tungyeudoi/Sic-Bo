@@ -39,6 +39,9 @@ document.getElementById('playerName').addEventListener('keydown', e => {
     if (e.key === 'Enter') registerPlayer();
 });
 
+// Load leaderboard ngay khi trang mở (màn hình welcome)
+loadLeaderboard();
+
 async function registerPlayer() {
     const nameInput = document.getElementById('playerName');
     const errorEl   = document.getElementById('welcome-error');
@@ -77,6 +80,8 @@ async function registerPlayer() {
 
         showScreen('screen-game');
         loadHistory();
+        initStream();
+        loadLeaderboard();  // Cập nhật bảng trong game
 
     } catch (err) {
         console.error(err);
@@ -179,6 +184,9 @@ async function playGame(choice) {
         // ── Update balance ──
         currentBalance = data.balance;
         animateBalance(data.balance);
+
+        // ── Cập nhật leaderboard sau mỗi ván (peak có thể thay đổi) ──
+        loadLeaderboard();
 
         // ── Prepend to history panel ──
         prependHistory(data);
@@ -329,4 +337,125 @@ function unlockUI(btnTai, btnXiu) {
 // Format numbers with thousands separators
 function fmt(n) {
     return Number(n).toLocaleString('vi-VN');
+}
+
+/* ─────────────────────────────────────────────────
+   LEADERBOARD – BẢNG DANH VỌNG
+───────────────────────────────────────────────── */
+const RANK_ICONS = ['🥇', '🥈', '🥉'];
+
+async function loadLeaderboard() {
+    try {
+        const res  = await fetch('/api/leaderboard');
+        const data = await res.json();
+        if (!data.success) return;
+        renderLeaderboard('lb-list-welcome', data.entries);
+        renderLeaderboard('lb-list-ingame',  data.entries);
+    } catch (e) {
+        console.error('Leaderboard error:', e);
+    }
+}
+
+function renderLeaderboard(listId, entries) {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (!entries.length) {
+        list.innerHTML = '<li class="lb-empty">Chưa có ai…</li>';
+        return;
+    }
+
+    entries.forEach(e => {
+        const li   = document.createElement('li');
+        li.className = 'lb-item' + (e.is_me ? ' me' : '');
+
+        const icon = RANK_ICONS[e.rank - 1] || e.rank;
+
+        li.innerHTML = `
+            <span class="lb-rank">${icon}</span>
+            <span class="lb-name">${e.name}${e.is_me ? ' (bạn)' : ''}</span>
+            <span class="lb-peak">${fmt(e.peak_balance)} đ</span>
+        `;
+        list.appendChild(li);
+    });
+}
+
+/* ─────────────────────────────────────────────────
+   SOI CẦU – STREAM
+───────────────────────────────────────────────── */
+let streamInterval   = 10;   // giây, sẽ được server cập nhật
+let streamCountdown  = 10;
+let streamLastId     = -1;   // id cuối đã nhận, tránh re-render không cần thiết
+let countdownTimer   = null;
+
+async function initStream() {
+    // Hiện panel
+    const panel = document.getElementById('stream-panel');
+    panel.classList.remove('hidden');
+
+    // Lấy cầu lần đầu ngay lập tức
+    await fetchStream();
+
+    // Đếm ngược và tự động refresh
+    countdownTimer = setInterval(async () => {
+        streamCountdown--;
+        document.getElementById('stream-timer').textContent = streamCountdown;
+
+        if (streamCountdown <= 0) {
+            streamCountdown = streamInterval;
+            await fetchStream();
+        }
+    }, 1000);
+}
+
+async function fetchStream() {
+    try {
+        const res  = await fetch('/api/stream');
+        const data = await res.json();
+        if (!data.success || !data.entries.length) return;
+
+        streamInterval  = data.interval;
+        streamCountdown = streamInterval;
+        document.getElementById('stream-timer').textContent = streamCountdown;
+
+        // Chỉ re-render nếu có cầu mới
+        const latest = data.entries[data.entries.length - 1];
+        if (latest.id === streamLastId) return;
+        streamLastId = latest.id;
+
+        renderStream(data.entries);
+    } catch (e) {
+        console.error('Stream fetch error:', e);
+    }
+}
+
+function renderStream(entries) {
+    const body = document.getElementById('stream-body');
+    body.innerHTML = '';
+
+    entries.forEach((e, idx) => {
+        const isLatest = idx === entries.length - 1;
+        const bubble   = document.createElement('div');
+
+        let cls  = 'stream-bubble';
+        let text = e.outcome === 'TRIPLE' ? '⚡' : e.outcome === 'TAI' ? 'T' : 'X';
+
+        if (e.outcome === 'TAI')    cls += ' tai';
+        else if (e.outcome === 'XIU')  cls += ' xiu';
+        else                           cls += ' triple';
+
+        if (isLatest) cls += ' latest';
+
+        bubble.className = cls;
+        bubble.textContent = text;
+        bubble.setAttribute('data-tip',
+            `${e.dice1}·${e.dice2}·${e.dice3} = ${e.total} | ${e.time}`
+        );
+
+        body.appendChild(bubble);
+    });
+
+    // Cuộn sang phải để thấy cầu mới nhất
+    body.scrollLeft = body.scrollWidth;
 }

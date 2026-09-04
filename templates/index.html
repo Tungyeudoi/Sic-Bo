@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sic Bo – Vui Là Chính</title>
+    <title>Tung Sic Bo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,50 +11,61 @@
 </head>
 <body>
 
-    <!-- ── Background video ── -->
-    <video autoplay muted loop playsinline id="bgVideo">
-        <source src="{{ url_for('static', filename='bgvideo.mp4') }}" type="video/mp4">
-    </video>
     <div class="bg-overlay"></div>
 
-    <!-- ════════════════════════════════════════════
-         SCREEN 1 – Welcome / Name entry
-    ═════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════
+         SCREEN 1 – Welcome
+    ══════════════════════════════════════════ -->
     <div id="screen-welcome" class="screen active">
+
+        <!-- Bảng danh vọng bên trái màn hình chào -->
+        <aside class="lb-side" id="lb-welcome">
+            <h2 class="lb-title">🏆 Danh Vọng</h2>
+            <ol class="lb-list" id="lb-list-welcome">
+                <li class="lb-empty">Đang tải…</li>
+            </ol>
+            <p class="lb-note">
+                🎁 Top 1 all-time → ib admin <strong>Tùng</strong> nhận quà!
+            </p>
+        </aside>
+
         <div class="welcome-card">
             <div class="welcome-logo">🎲</div>
-            <h1 class="welcome-title">SIC BO</h1>
-            <p class="welcome-sub">Vui là chính – Không có giá trị thực</p>
+            <h1 class="welcome-title">TUNG SIC BO</h1>
 
             <div class="welcome-form">
                 <label class="welcome-label" for="playerName">
-                    Chúng tôi nên gọi bạn là gì?
+                    Tên của bạn là gì?
                 </label>
                 <input
                     type="text"
                     id="playerName"
                     class="welcome-input"
-                    placeholder="Nhập tên của bạn…"
+                    placeholder="Nhập tên…"
                     maxlength="80"
                     autocomplete="off"
                     autofocus
                 >
                 <div id="welcome-error" class="welcome-error hidden"></div>
                 <button id="btn-start" class="btn-start" onclick="registerPlayer()">
-                    Bắt đầu chơi →
+                    Vào bàn →
                 </button>
             </div>
 
             <p class="welcome-note">
-                Bạn sẽ nhận <strong>36,000,000 đ</strong> tiền ảo để chơi.<br>
-                Chơi cho vui thôi, không có giá trị quy đổi nhé!
+                Số dư khởi đầu: <strong>36,000,000 đ</strong>
+            </p>
+
+            <p class="welcome-credit">
+                Web do <strong>Tùng</strong> tự code, nhằm mục đích vui vẻ và test công nghệ.<br>
+                Không lừa đảo hay kiếm tiền với bất kỳ mục đích nào.
             </p>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
          SCREEN 2 – Game table
-    ═════════════════════════════════════════════ -->
+    ══════════════════════════════════════════ -->
     <div id="screen-game" class="screen hidden">
 
         <!-- Left panel: rules -->
@@ -78,38 +89,43 @@
                     <span><strong>Tỷ lệ:</strong> Đặt 1 thắng 1</span>
                 </li>
             </ul>
-            <div class="rules-quote">"Cờ bạc người không chơi không bao giờ thắng."</div>
+
+            <!-- Bảng danh vọng trong bàn chơi (dưới luật) -->
+            <div class="lb-ingame">
+                <h2 class="lb-title" style="margin-top:18px">🏆 Danh Vọng</h2>
+                <ol class="lb-list" id="lb-list-ingame">
+                    <li class="lb-empty">Đang tải…</li>
+                </ol>
+                <p class="lb-note">
+                    🎁 Top 1 all-time → ib admin <strong>Tùng</strong> nhận quà!
+                </p>
+            </div>
         </aside>
 
         <!-- Centre: game table -->
         <main class="game-table" id="gameTable">
 
-            <!-- Header -->
             <header class="table-header">
-                <h1 class="table-title">★ SIC BO ★</h1>
+                <h1 class="table-title">★ TUNG SIC BO ★</h1>
                 <div class="player-badge">
                     👤 <span id="display-name">–</span>
                 </div>
             </header>
 
-            <!-- Balance -->
             <div class="balance-row">
                 <div class="balance-box">
                     💰 <span id="balance">36,000,000</span> <span class="currency">đ</span>
                 </div>
             </div>
 
-            <!-- Dice area -->
             <div class="dice-container">
                 <div id="dice1" class="dice">?</div>
                 <div id="dice2" class="dice">?</div>
                 <div id="dice3" class="dice">?</div>
             </div>
 
-            <!-- Result message -->
             <div class="result-display" id="result-text">Sẵn sàng!</div>
 
-            <!-- Bet input -->
             <div class="bet-area">
                 <div class="quick-bets">
                     <button class="btn-quick" onclick="setBet(100000)">100K</button>
@@ -128,7 +144,6 @@
                 >
             </div>
 
-            <!-- Action buttons -->
             <div class="action-buttons">
                 <button id="btn-xiu" class="btn-choice btn-xiu" onclick="playGame('XIU')">
                     🔵 XỈU<span class="btn-sub">4 – 10</span>
@@ -148,18 +163,25 @@
         </aside>
     </div>
 
-    <!-- ════════════════════════════════════════════
-         SCREEN 3 – Broke (out of money)
-    ═════════════════════════════════════════════ -->
+    <!-- Soi cầu – fixed bottom -->
+    <div id="stream-panel" class="stream-panel hidden">
+        <div class="stream-header">
+            <span class="stream-title">🔮 Soi Cầu</span>
+            <span class="stream-note">Tự động cập nhật mỗi 10 giây</span>
+            <span class="stream-countdown">Cầu mới sau: <strong id="stream-timer">10</strong>s</span>
+        </div>
+        <div class="stream-body" id="stream-body">
+            <span class="stream-empty">Đang tải cầu…</span>
+        </div>
+    </div>
+
+    <!-- SCREEN 3 – Broke -->
     <div id="screen-broke" class="screen hidden">
         <div class="broke-card">
             <div class="broke-icon">💸</div>
             <h2 class="broke-title">Hết tiền rồi!</h2>
-            <p class="broke-msg">
-                Tiền ảo của bạn đã về 0.<br>
-                Hãy thử lại với một cái tên mới nhé!
-            </p>
-            <button class="btn-start" onclick="location.reload()">Chơi lại từ đầu</button>
+            <p class="broke-msg">Số dư của bạn đã về 0.</p>
+            <button class="btn-start" onclick="location.reload()">Chơi lại</button>
         </div>
     </div>
 
